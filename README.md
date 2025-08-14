@@ -24,3 +24,9 @@ Features that you won't see in CornerCal (at least not by me!):
 
 - Custom calendar features such as events and reminders.
 - Heavy themes that don't fit the style of macOS
+
+---
+
+# 2025-08-14
+
+- 通过调用 https://www.tianapi.com/ 接口获取节假日数据，支持显示节假日、调休、阴历

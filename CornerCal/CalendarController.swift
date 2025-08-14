@@ -12,14 +12,18 @@ struct Day {
     var isNumber = false
     var isToday = false
     var isCurrentMonth = false
+    var isWeekend = false
     var text = "0"
+    var lunarDay: String? = nil // 阴历日期
+    var holidayDaycode: Int? = nil // 节假日类型代码
 }
 
 class CalendarController: NSObject {
     
-    let calendar = Calendar.autoupdatingCurrent
+    var calendar = Calendar.autoupdatingCurrent
     let formatter = DateFormatter()
     let monthFormatter = DateFormatter()
+    let dateFormatter = DateFormatter() // 用于格式化日期字符串
     var locale: Locale!
     var timer: Timer? = nil
     
@@ -37,6 +41,12 @@ class CalendarController: NSObject {
     var onTimeUpdate: (() -> ())? = nil
     var onCalendarUpdate: (() -> ())? = nil
     
+    // 存储节假日信息，key为日期字符串(yyyy-MM-dd)，value为HolidayInfo
+    private var holidayInfo: [String: HolidayInfo] = [:]
+    private var holidayAPI: HolidayAPI? = nil
+    // 错误处理闭包
+    var onAPIError: ((String) -> Void)? = nil
+    
     override init() {
         super.init()
         
@@ -46,11 +56,19 @@ class CalendarController: NSObject {
         monthFormatter.locale = locale
         monthFormatter.dateFormat = "MMMM yyyy"
         
+        // 设置日期格式化器
+        dateFormatter.locale = locale
+        dateFormatter.dateFormat = "yyyy-MM-dd"
+        
+        calendar.locale = locale
         weekdays = calendar.veryShortWeekdaySymbols
         daysInWeek = weekdays.count
         
         let maxWeeksInMonth = (calendar.maximumRange(of: .day)?.upperBound)! / daysInWeek
         shownItemCount = daysInWeek * (maxWeeksInMonth + 2 + 1)
+        
+        // 初始化节假日API
+        holidayAPI = HolidayAPI()
         
         updateCurrentlyShownDays()
     }
@@ -149,6 +167,48 @@ class CalendarController: NSObject {
         currentMonth = calendar.date(byAdding: .month, value: Int(monthOffset), to: Date())!
         let lastMonth = calendar.date(byAdding: .month, value: Int(-1), to: currentMonth!)!
         lastFirstWeekdayLastMonth = getLastFirstWeekday(month: lastMonth)
+        
+        // 获取节假日数据，日历会显示前一个月和后一个月的部分日期，在节假日跨月的情况下，只获取当月节假日数据是不行的
+        let nextMonth = calendar.date(byAdding: .month, value: Int(+1), to: currentMonth!)!
+        fetchHolidayData(forMonth: lastMonth)
+        fetchHolidayData(forMonth: currentMonth!)
+        fetchHolidayData(forMonth: nextMonth)
+    }
+    
+    private func fetchHolidayData(forMonth month: Date) {
+        // 清空之前的节假日数据
+        holidayInfo.removeAll()
+        
+        guard let holidayAPI = holidayAPI else {
+            return
+        }
+        
+        holidayAPI.fetchHolidays(forMonth: month) { [weak self] (holidays, error) in
+            if let error = error {
+                let errorMessage = "API错误: \(error.localizedDescription)"
+                print(errorMessage)
+                // 传递错误信息到MainMenuController
+                DispatchQueue.main.async {
+                    self?.onAPIError?(errorMessage)
+                }
+                return
+            }
+            
+            guard let holidays = holidays else {
+                print("未获取到节假日数据")
+                return
+            }
+            
+            // 存储节假日数据
+            for holiday in holidays {
+                self?.holidayInfo[holiday.date] = holiday
+            }
+            
+            // 更新日历显示
+            DispatchQueue.main.async {
+                self?.onCalendarUpdate?()
+            }
+        }
     }
     
     func subscribe(onTimeUpdate: @escaping () -> (), onCalendarUpdate: @escaping () -> ()) {
@@ -183,6 +243,21 @@ class CalendarController: NSObject {
             day.text = String(calendar.ordinality(of: .day, in: .month, for: date)!)
             day.isCurrentMonth = calendar.isDate(date, equalTo: currentMonth!, toGranularity: .month)
             day.isToday = calendar.isDateInToday(date)
+            
+            // 设置节假日信息、阴历日期
+            let dateString = dateFormatter.string(from: date)
+            if let holidayData = holidayInfo[dateString] {
+                day.holidayDaycode = holidayData.daycode
+                day.lunarDay = holidayData.lunarday == "初一" ? holidayData.lunarmonth : holidayData.lunarday
+            } else {
+                // 处理没有找到对应节日信息的情况
+                day.holidayDaycode = nil
+                day.lunarDay = "nil"
+            }
+            
+            // 判断是否是周末
+            let weekday = calendar.component(.weekday, from: date)
+            day.isWeekend = (weekday == 1 || weekday == 7) // 1是周日，7是周六
         }
         
         return day

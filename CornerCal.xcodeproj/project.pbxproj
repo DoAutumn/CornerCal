@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		22F4A92E26A1E4F900B12C3D /* HolidayAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = 22F4A92D26A1E4F900B12C3D /* HolidayAPI.swift */; };
 		229D07A51F76EFEA00A22E37 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 229D07A41F76EFEA00A22E37 /* AppDelegate.swift */; };
 		229D07A71F76EFEA00A22E37 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 229D07A61F76EFEA00A22E37 /* Assets.xcassets */; };
 		229D07AA1F76EFEA00A22E37 /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 229D07A81F76EFEA00A22E37 /* MainMenu.xib */; };
@@ -29,6 +30,7 @@
 		229D07C21F78709A00A22E37 /* CalendarDayItem.xib */ = {isa = PBXFileReference; lastKnownFileType = file.xib; path = CalendarDayItem.xib; sourceTree = "<group>"; };
 		22B3E0951F9BEF4400DA4018 /* SettingsController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsController.swift; sourceTree = "<group>"; };
 		22D879111F8AD27A00D1956C /* CalendarController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CalendarController.swift; sourceTree = "<group>"; };
+		22F4A92D26A1E4F900B12C3D /* HolidayAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HolidayAPI.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -71,6 +73,7 @@
 				22B3E0951F9BEF4400DA4018 /* SettingsController.swift */,
 				229D07C11F78709A00A22E37 /* CalendarDayItem.swift */,
 				229D07C21F78709A00A22E37 /* CalendarDayItem.xib */,
+				22F4A92D26A1E4F900B12C3D /* HolidayAPI.swift */,
 			);
 			path = CornerCal;
 			sourceTree = "<group>";
@@ -152,6 +155,7 @@
 				22D879121F8AD27A00D1956C /* CalendarController.swift in Sources */,
 				229D07A51F76EFEA00A22E37 /* AppDelegate.swift in Sources */,
 				229D07C31F78709A00A22E37 /* CalendarDayItem.swift in Sources */,
+				22F4A92E26A1E4F900B12C3D /* HolidayAPI.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

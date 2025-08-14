@@ -27,7 +27,10 @@ class MainMenuController: NSObject, NSCollectionViewDataSource {
         calendarItem.setBold(bold: !day.isNumber)
         calendarItem.setText(text: day.text)
         calendarItem.setPartlyTransparent(partlyTransparent: !day.isCurrentMonth)
-        calendarItem.setHasRedBackground(hasRedBackground: day.isToday)
+        calendarItem.setIsToday(isToday: day.isToday)
+        calendarItem.setHolidayInfo(daycode: day.holidayDaycode)
+        calendarItem.setIsWeekend(isWeekend: day.isWeekend)
+        calendarItem.setLunarDay(lunarDay: day.lunarDay ?? "")
         
         return calendarItem
     }
@@ -35,6 +38,8 @@ class MainMenuController: NSObject, NSCollectionViewDataSource {
     @IBOutlet weak var controller: CalendarController!
     
     @IBOutlet weak var statusMenu: NSMenu!
+    
+    @IBOutlet weak var apiMenuItem: NSMenuItem!
     
     @IBOutlet weak var monthLabel: NSButton!
     
@@ -95,11 +100,37 @@ class MainMenuController: NSObject, NSCollectionViewDataSource {
     func refreshState() {
         statusItem.menu = statusMenu
         controller.subscribe(onTimeUpdate: updateMenuTime, onCalendarUpdate: updateCalendar)
+        
+        // 订阅API错误回调
+        controller.onAPIError = { [weak self] errorMessage in
+           self?.updateErrorDisplay(message: errorMessage)
+        }
+        
+        // 初始隐藏错误菜单项
+        updateErrorDisplay(message: nil)
+    }
 
+    // 更新错误信息显示
+    private func updateErrorDisplay(message: String?) {
+        if let errorMessage = message {
+            // 显示错误信息
+            apiMenuItem.title = errorMessage
+            apiMenuItem.isHidden = false
+            // 设置红色文本
+            let attributes: [NSAttributedStringKey: Any] = [
+                .foregroundColor: NSColor(red: 212/255, green: 57/255, blue: 0.0, alpha: 1.0)
+            ]
+            apiMenuItem.attributedTitle = NSAttributedString(string: errorMessage, attributes: attributes)
+        } else {
+            // 隐藏错误信息
+            apiMenuItem.isHidden = true
+        }
     }
     
     func deactivate() {
         controller.pause()
+        // 清空错误回调避免内存泄漏
+        controller.onAPIError = nil
     }
     
     @IBAction func openSettingsClicked(_ sender: NSMenuItem) {
