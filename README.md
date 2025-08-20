@@ -30,3 +30,5 @@ Features that you won't see in CornerCal (at least not by me!):
 # 2025-08-14
 
 - 通过调用 https://www.tianapi.com/ 接口获取节假日数据，支持显示节假日、调休、阴历
+
+![法定节假日](screenshot-02.png)
