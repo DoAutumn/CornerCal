@@ -45,7 +45,15 @@ struct HolidayInfo: Codable {
 class HolidayAPI {
     private let apiKey = "5e42ad1becfdcc48c05eb18adea4decf"
     private let baseURL = "https://apis.tianapi.com/jiejiari/index"
-    private let session = URLSession.shared
+    private let session: URLSession
+    
+    init() {
+        // 配置会话超时时间为5秒
+        let configuration = URLSessionConfiguration.default
+        configuration.timeoutIntervalForRequest = 5.0
+        configuration.timeoutIntervalForResource = 5.0
+        session = URLSession(configuration: configuration)
+    }
 
     func fetchHolidays(forMonth month: Date, completion: @escaping ([HolidayInfo]?, Error?) -> Void) {
         // 格式化日期为 yyyy-MM 格式

@@ -97,6 +97,12 @@ class MainMenuController: NSObject, NSCollectionViewDataSource {
         applyButtonHighlightSettings(button: buttonRight)
     }
     
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        // 初始隐藏错误菜单项
+        apiMenuItem.isHidden = true
+    }
+    
     func refreshState() {
         statusItem.menu = statusMenu
         controller.subscribe(onTimeUpdate: updateMenuTime, onCalendarUpdate: updateCalendar)
@@ -107,7 +113,7 @@ class MainMenuController: NSObject, NSCollectionViewDataSource {
         }
         
         // 初始隐藏错误菜单项
-        updateErrorDisplay(message: nil)
+        // updateErrorDisplay(message: nil)
     }
 
     // 更新错误信息显示
@@ -151,6 +157,27 @@ class MainMenuController: NSObject, NSCollectionViewDataSource {
     
     @IBAction func clearMonthHopping(_ sender: Any) {
         controller.resetMonth()
+    }
+    
+    @IBAction func refreshHolidayData(_ sender: NSMenuItem) {
+        // 重新获取节假日数据
+        controller.refreshHolidayData()
+        
+        // 临时显示刷新提示
+        apiMenuItem.title = "正在刷新..."
+        apiMenuItem.isHidden = false
+        let attributes: [NSAttributedStringKey: Any] = [
+            .foregroundColor: NSColor(red: 0.0, green: 122.0/255, blue: 1.0, alpha: 1.0)
+        ]
+        apiMenuItem.attributedTitle = NSAttributedString(string: "正在刷新...", attributes: attributes)
+        
+        // 3秒后恢复隐藏状态（如果没有错误）
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3.0) {
+            // 只有在没有错误信息时才隐藏
+            if self.apiMenuItem.title == "正在刷新..." {
+                self.apiMenuItem.isHidden = true
+            }
+        }
     }
 
 }

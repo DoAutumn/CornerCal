@@ -291,4 +291,19 @@ class CalendarController: NSObject {
         updateCurrentlyShownDays()
         onCalendarUpdate?()
     }
+    
+    // 重新获取节假日数据
+    func refreshHolidayData() {
+        // 清空之前的节假日数据
+        holidayInfo.removeAll()
+        
+        // 重新获取当前显示的三个月的节假日数据
+        if let currentMonth = currentMonth {
+            let lastMonth = calendar.date(byAdding: .month, value: Int(-1), to: currentMonth)!
+            let nextMonth = calendar.date(byAdding: .month, value: Int(+1), to: currentMonth)!
+            fetchHolidayData(forMonth: lastMonth)
+            fetchHolidayData(forMonth: currentMonth)
+            fetchHolidayData(forMonth: nextMonth)
+        }
+    }
 }
